@@ -62,3 +62,7 @@ jobs:
           curl --fail http://localhost:8080/
           docker stop democyber-test
           docker rm democyber-test
+      # Push Docker image to Docker Hub
+      - name: Push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: docker push ${{ env.DOCKER_IMAGE_NAME }}
