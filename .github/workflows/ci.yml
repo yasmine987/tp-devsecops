@@ -70,13 +70,9 @@ jobs:
           curl --fail http://localhost:8080/
           docker stop democyber-test
           docker rm democyber-test
-      # Push Docker image to Docker Hub
-      - name: Push Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: docker push ${{ env.DOCKER_IMAGE_NAME }}
 
       # Trivy scan
-      - name: Build Docker image
+      - name: Build Docker image for Trivy
         run: docker build -t democyber:latest .
 
       - name: Scan Docker image with Trivy
@@ -88,9 +84,15 @@ jobs:
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
 
+      # Upload Trivy report
       - name: Upload Trivy report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
           path: trivy-report.json
+
+      # Push Docker image to Docker Hub
+      - name: Push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: docker push ${{ env.DOCKER_IMAGE_NAME }}
